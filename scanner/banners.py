@@ -1,4 +1,4 @@
-# Author: TK
+# Author: Mohammad Hammad Asif
 # Date: 24-03-2026
 # Purpose: Grab service banners, identify services, and extract versions
 

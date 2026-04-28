@@ -1,4 +1,4 @@
-# Author: TK
+# Author: Mohammad Hammad Asif
 # Date: 24-03-2026
 # Purpose: Rule-based findings engine with CVE matching and baseline exposure checks
 

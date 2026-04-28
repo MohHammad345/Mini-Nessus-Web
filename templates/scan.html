@@ -1,0 +1,122 @@
+<!-- Author: TK --->
+<!-- Date: 06-03-2026 --->
+<!-- Purpose: Scan details page --->
+
+{% extends "base.html" %}
+
+{% block title %}Scan {{ scan.id }}{% endblock %}
+{% block brand_subtitle %}Detailed scan results and prioritized findings{% endblock %}
+
+{% block extra_head %}
+{% if scan.status in ["queued", "running"] %}
+<meta http-equiv="refresh" content="3">
+{% endif %}
+{% endblock %}
+
+{% block topbar_actions %}
+<a class="button button-primary" href="/scan/{{ scan.id }}/pdf">Download PDF</a>
+<a class="button button-secondary" href="/">Back to Dashboard</a>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h2>Scan #{{ scan.id }}</h2>
+    <p>
+        Target {{ scan.target }} scanned with the {{ scan.profile }} profile.
+        Review the highest-risk findings first and work downward.
+    </p>
+</section>
+
+{% set risk_level = (scan.risk_level or "LOW")|upper %}
+{% set status = (scan.status or "queued")|lower %}
+
+<section class="meta-grid">
+    <div class="card">
+        <div class="metric-label">Risk Score</div>
+        <div class="metric-value">{{ scan.risk_score or 0 }}</div>
+        <div class="metric-sub">Aggregated scan-level risk score</div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Risk Level</div>
+        <div class="metric-value">
+            <span class="pill {{ risk_level }}">{{ scan.risk_level or "LOW" }}</span>
+        </div>
+        <div class="metric-sub">Based on the current scan findings</div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Status</div>
+        <div class="metric-value">
+            <span class="pill status-{{ status }}">{{ scan.status }}</span>
+        </div>
+        <div class="metric-sub">Refreshes automatically while queued or running</div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Created</div>
+        <div class="metric-value" style="font-size: 18px;">{{ scan.created_at }}</div>
+        <div class="metric-sub">Profile: {{ scan.profile }} · Target: {{ scan.target }}</div>
+    </div>
+</section>
+
+<section class="section-head">
+    <div>
+        <h3>Findings</h3>
+        <p>Each row shows severity, affected service, issue summary, and recommended remediation.</p>
+    </div>
+</section>
+
+<div class="table-card">
+    {% if scan.findings %}
+    <div class="table-wrap">
+        <table>
+            <tr>
+                <th>Severity</th>
+                <th>Port</th>
+                <th>Service</th>
+                <th>CVSS</th>
+                <th>Version</th>
+                <th>CVE</th>
+                <th>Issue</th>
+                <th>Recommendation</th>
+            </tr>
+            {% for f in scan.findings %}
+            {% set sev = (f.severity or "LOW")|upper %}
+            <tr>
+                <td><span class="pill {{ sev }}">{{ sev }}</span></td>
+                <td class="mono">{{ f.port or "-" }}</td>
+                <td>{{ f.service or "-" }}</td>
+                <td>
+                    {% if f.cvss_score is not none %}
+                        <span class="cvss-box">{{ "%.1f"|format(f.cvss_score) }}</span>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>{{ f.version or "-" }}</td>
+                <td class="mono">{{ f.cve or "-" }}</td>
+                <td>
+                    <div class="issue-title">{{ f.issue }}</div>
+                    {% if f.impact %}
+                        <div class="issue-sub"><strong>Why it matters:</strong> {{ f.impact }}</div>
+                    {% endif %}
+                    {% if f.banner %}
+                        <div class="issue-sub"><strong>Banner:</strong> {{ f.banner }}</div>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="rec-text">{{ f.recommendation }}</div>
+                    {% if f.cvss_vector %}
+                        <div class="issue-sub"><strong>Vector:</strong> {{ f.cvss_vector }}</div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% else %}
+    <div class="empty">No findings stored for this scan.</div>
+    {% endif %}
+</div>
+{% endblock %}

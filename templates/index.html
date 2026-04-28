@@ -1,0 +1,198 @@
+ <!-- Author:TK -->  
+<!-- Date: 05-03-2026 -->
+<!-- Purpose: Dashboard, show scan history -->
+
+{% extends "base.html" %}
+
+{% block title %}Mini-Nessus Web{% endblock %}
+{% block brand_subtitle %}Lightweight vulnerability scanning dashboard{% endblock %}
+
+{% block topbar_actions %}
+<a class="button button-primary" href="/scan/new">+ New Scan</a>
+{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h2>Security posture at a glance</h2>
+    <p>
+        Review scan history, track severity trends, and jump straight into high-risk targets.
+    </p>
+</section>
+
+<section class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total scans</div>
+        <div class="stat-value">{{ scans|length }}</div>
+        <div class="stat-sub">Historical scans available in this dashboard</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Critical findings</div>
+        <div class="stat-value" id="criticalStat">0</div>
+        <div class="stat-sub">Pulled from aggregated dashboard data</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">High findings</div>
+        <div class="stat-value" id="highStat">0</div>
+        <div class="stat-sub">Watch this before it snowballs</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Latest scan</div>
+        <div class="stat-value">
+            {% if scans %}
+                #{{ scans[0].id }}
+            {% else %}
+                —
+            {% endif %}
+        </div>
+        <div class="stat-sub">
+            {% if scans %}
+                {{ scans[0].target }}
+            {% else %}
+                No scans yet
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="grid">
+    <div class="card">
+        <h3>Severity Distribution</h3>
+        <div class="chart-wrap">
+            <canvas id="severityChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Scan Timeline</h3>
+        <div class="chart-wrap">
+            <canvas id="timelineChart"></canvas>
+        </div>
+    </div>
+</section>
+
+<section class="section-head">
+    <div>
+        <h2>Scan History</h2>
+        <p>Open any scan for full findings, risk score, and PDF export.</p>
+    </div>
+</section>
+
+{% if scans %}
+<div class="table-card">
+    <div class="table-wrap">
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Target</th>
+                <th>Profile</th>
+                <th>Status</th>
+                <th>Risk</th>
+                <th>Created</th>
+                <th>Open</th>
+            </tr>
+            {% for s in scans %}
+            {% set status = (s.status or "queued")|lower %}
+            {% set risk = (s.risk_level or "INFO")|upper %}
+            <tr>
+                <td class="mono">#{{ s.id }}</td>
+                <td>{{ s.target }}</td>
+                <td>{{ s.profile }}</td>
+                <td><span class="pill status-{{ status }}">{{ status }}</span></td>
+                <td><span class="pill sev-{{ risk }}">{{ s.risk_level or "INFO" }}</span></td>
+                <td class="muted">{{ s.created_at }}</td>
+                <td><a class="scan-link" href="/scan/{{ s.id }}">View scan</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty">
+    No scans yet. Launch one and this page will stop looking so empty.
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+fetch("/api/dashboard")
+    .then(res => res.json())
+    .then(data => {
+        const sev = data.severity_counts || {};
+        const severityOrder = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"];
+        const severityValues = severityOrder.map(key => sev[key] || 0);
+
+        document.getElementById("criticalStat").textContent = sev["CRITICAL"] || 0;
+        document.getElementById("highStat").textContent = sev["HIGH"] || 0;
+
+        new Chart(document.getElementById("severityChart"), {
+            type: "doughnut",
+            data: {
+                labels: severityOrder,
+                datasets: [{
+                    data: severityValues,
+                    backgroundColor: [
+                        "#7f1d1d",
+                        "#dc2626",
+                        "#d97706",
+                        "#2563eb",
+                        "#6b7280"
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    }
+                }
+            }
+        });
+
+        const timeline = data.scan_timeline || [];
+
+        new Chart(document.getElementById("timelineChart"), {
+            type: "line",
+            data: {
+                labels: timeline.map(x => x.created_at),
+                datasets: [{
+                    label: "Completed Scans",
+                    data: timeline.map((_, i) => i + 1),
+                    borderColor: "#2563eb",
+                    backgroundColor: "rgba(37, 99, 235, 0.1)",
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

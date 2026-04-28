@@ -1,0 +1,87 @@
+<!-- Author: TK --->
+<!-- Date : 05-03-2026 --->
+<!-- Purpose: Scan page, enter Host IP, port, scan type --->
+
+{% extends "base.html" %}
+
+{% block title %}New Vulnerability Scan{% endblock %}
+{% block brand_subtitle %}Start a new vulnerability assessment{% endblock %}
+
+{% block topbar_actions %}
+<a class="button button-secondary" href="/">Back to Dashboard</a>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="overflow: hidden; max-width: 900px; margin: 0 auto;">
+    <div class="card-head">
+        <h2>Launch New Scan</h2>
+        <p>Run a quick check or a broader assessment against a lab target within the allowed range.</p>
+    </div>
+
+    <div class="card-body">
+        <div class="note">
+            <strong>Lab restriction:</strong> allowed CIDR is {{ allowed }}
+        </div>
+
+        <form method="POST">
+            <div class="grid-form">
+                <div class="field">
+                    <label>Target IP</label>
+                    <input type="text" name="target" placeholder="192.168.56.110" required>
+                    <span class="help">Enter a single IP address inside the lab range.</span>
+                </div>
+
+                <div class="field">
+                    <label>Ports (optional)</label>
+                    <input type="text" name="ports" placeholder="22,80,3306,6379">
+                    <span class="help">Leave blank to use the selected profile defaults.</span>
+                </div>
+
+                <div class="field full">
+                    <label>Scan Profile</label>
+                    <div class="profile-grid">
+                        <label class="profile-card">
+                            <div>
+                                <input type="radio" name="profile" value="quick" checked>
+                                <span class="profile-title">Quick</span>
+                            </div>
+                            <div class="profile-desc">
+                                Faster scan, smaller surface, useful for rapid checks and iteration.
+                            </div>
+                        </label>
+
+                        <label class="profile-card">
+                            <div>
+                                <input type="radio" name="profile" value="full">
+                                <span class="profile-title">Full</span>
+                            </div>
+                            <div class="profile-desc">
+                                Broader service coverage and better visibility into exposed attack surface.
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="field full">
+                    <div class="auth-box">
+                        <label>SSH Username (optional)</label>
+                        <input type="text" name="ssh_user" placeholder="ubuntu">
+
+                        <label style="margin-top: 16px;">SSH Password (optional)</label>
+                        <input type="password" name="ssh_pass" placeholder="Enter SSH password">
+
+                        <span class="help">
+                            Add credentials only when you want authenticated checks. Otherwise the scan will stay unauthenticated.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="button button-primary">Launch Scan</button>
+                <a href="/" class="button button-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

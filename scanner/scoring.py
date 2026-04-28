@@ -1,4 +1,4 @@
-# Author: TK
+# Author: Mohammad Hammad Asif
 # Date: 25-03-2026
 # Purpose: assign CVSS style score + severity + impact
 

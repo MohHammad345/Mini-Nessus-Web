@@ -1,4 +1,4 @@
-# Author: TK
+# Author: Mohammad Hammad Asif
 # Date: 04-03-2026
 # Purpose: Threaded TCP port scanner. Detects open TCP ports (network reconnaissance layer).
 # Update: updated scanner, new scanner scans 200 threads in 5 sec, mimics a real scanner.

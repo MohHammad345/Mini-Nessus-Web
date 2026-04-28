@@ -1,4 +1,4 @@
-# Author: TK
+# Author: Mohammad Hammad Asif
 # Date: 04-03-2026
 # Purpose: Validate target, run threaded port scan, grab banners, identify services, and generate findings
 

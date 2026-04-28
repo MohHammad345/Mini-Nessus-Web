@@ -1,4 +1,4 @@
-# Author: TK
+# Author: Mohammad Hammad Asif
 # Date: 24-03-2026
 # Purpose: Web routes for dashboard, scan creation, scan viewing, PDF download, and dashboard API
 

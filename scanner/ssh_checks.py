@@ -1,4 +1,4 @@
-# Author: TK
+# Author: Mohammad Hammad Asif
 # Date: 24-03-2025
 # Purpose: Runs Authenticated SSH checks requires valid SSH creds, only use on systems you own or are authorized to test.
 

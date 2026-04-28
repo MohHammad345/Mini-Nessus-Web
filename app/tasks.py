@@ -1,4 +1,4 @@
-# Author: TK
+# Author: Mohammad Hammad Asif
 # Date: 04-03-2026
 # Purpose: Celery tasks for running scans and storing results
 
